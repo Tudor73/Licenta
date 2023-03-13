@@ -1,0 +1,14 @@
+b 8 6 5 
+g 7 
+
+adica g f e d g prima parte si a doua f a f 
+
+
+NOTES : 
+- overtones sunt o problema (poate incerc sa iau doar ultimii cativa la fiecare nota)
+
+- filtrele inca nu stiu cum merg 
+
+
+505: 
+    e, d, c, b,a, b,c,c,c,c,c, b,b,b,b,b e e, e e, e 
