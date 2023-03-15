@@ -4,7 +4,7 @@ from scipy.signal import butter, lfilter, cheby1
 
 import librosa
 
-def load_signal(filepath: str,): 
+def load_signal_from_file_path(filepath: str,): 
     y, fs = librosa.load(filepath, sr=None) 
     y = librosa.to_mono(y)
     order = 3

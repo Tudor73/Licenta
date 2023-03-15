@@ -1,5 +1,5 @@
 import os 
-from lib import load_signal, find_notes
+from lib import load_signal_from_file_path, find_notes
 
 files = os.listdir("C:/projects/final/inputs")
 
@@ -23,7 +23,7 @@ def calculate(expected, actual):
 total_percentage = 0
 
 for idx, filename in enumerate(files):
-    y, fs = load_signal(f"C:/projects/final/inputs/{filename}")
+    y, fs = load_signal_from_file_path(f"C:/projects/final/inputs/{filename}")
     notes = find_notes(y, fs)
     percentage = calculate(expected_results[idx][1], notes)
     total_percentage += percentage
