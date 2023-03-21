@@ -4,9 +4,23 @@ from scipy.signal import butter, lfilter, cheby1
 
 import librosa
 
-def load_signal_from_file_path(filepath: str,): 
+def load_signal_from_file_path(filepath: str): 
     y, fs = librosa.load(filepath, sr=None) 
     y = librosa.to_mono(y)
+    order = 3
+    low = 120.0
+    high= 900.0
+    b,a = butter(order, [low, high], fs=fs, btype='band')
+    y[np.abs(y) < 0.03] = 0
+    filtered_sound = lfilter(b, a ,y)
+    y = filtered_sound
+
+    return y, fs
+
+
+def load_siganl_from_file(file):
+    y, fs = librosa.load(file, sr=None) 
+    # y = librosa.to_mono(y)
     order = 3
     low = 120.0
     high= 900.0
