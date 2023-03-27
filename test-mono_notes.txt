@@ -12,3 +12,7 @@ NOTES :
 
 505: 
     e, d, c, b,a, b,c,c,c,c,c, b,b,b,b,b e e, e e, e 
+
+
+celalalta :
+    e e e e f# G# B C# C# C# C# B F# F# F# F# F# C# B B B G# F# E 

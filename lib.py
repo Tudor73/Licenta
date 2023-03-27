@@ -3,6 +3,7 @@ import numpy as np
 from scipy.signal import butter, lfilter, cheby1
 
 import librosa
+from fretboard import fretboard
 
 def load_signal_from_file_path(filepath: str): 
     y, fs = librosa.load(filepath, sr=None) 
@@ -31,6 +32,12 @@ def load_siganl_from_file(file):
 
     return y, fs
 
+def find_maximum_amplitude(y):
+    # fft_frequencies = np.fft.rfftfreq(len(y), 1/fs)
+    sound_fft = np.fft.rfft(y) 
+    return max(np.abs(sound_fft))
+
+
 def plot_signal(y, fs):
     t = np.linspace(0, len(y)/fs, 1/fs)
     plt.plot(t, y)
@@ -47,15 +54,15 @@ def plot_fft(y, fs):
     plt.ylabel("Amplitude")
 
 
-def find_fundamental_frequency(fft, fft_frequencies):
-    thrershold = 190
+def find_fundamental_frequency(fft, fft_frequencies, maxim):
+    threshold = 0.025
     notes = []
     for j in range(len(fft)):
-        amplitude = np.abs(fft[j])
+        amplitude = np.abs(fft[j]) / maxim
         freq = round(fft_frequencies[j], 2)
         if freq > 1000 or freq < 80:
             continue
-        if amplitude > thrershold: 
+        if amplitude > threshold: 
             notes.append([freq, round(amplitude,2)])
 
     if notes == []:
@@ -64,7 +71,7 @@ def find_fundamental_frequency(fft, fft_frequencies):
         # print(librosa.hz_to_note(n[0]), n[1], end=" || ")
     return min(notes, key = lambda x: x[0])
 
-def find_notes(y, fs): 
+def find_notes(y, fs, maxim): 
     onset_frames = librosa.onset.onset_detect(y=y)
     onset_samples = librosa.frames_to_samples(onset_frames)
 
@@ -74,7 +81,7 @@ def find_notes(y, fs):
         window = y[onset_samples[i]: onset_samples[i+1]]
         fft_frequencies = np.fft.rfftfreq(len(window), 1/fs)
         fft = np.fft.rfft(window)
-        notes_from_sequence = find_fundamental_frequency(fft, fft_frequencies)
+        notes_from_sequence = find_fundamental_frequency(fft, fft_frequencies, maxim)
         if notes_from_sequence != None:
             notes.append(librosa.hz_to_note(notes_from_sequence[0]))
 
@@ -82,8 +89,21 @@ def find_notes(y, fs):
     final_window = y[onset_samples[-1]:]
     fft_frequencies = np.fft.rfftfreq(len(final_window), 1/fs)
     fft = np.fft.rfft(final_window)
-    notes_from_sequence = find_fundamental_frequency(fft, fft_frequencies)
+    notes_from_sequence = find_fundamental_frequency(fft, fft_frequencies, maxim)
     if notes_from_sequence != None:
         notes.append(librosa.hz_to_note(notes_from_sequence[0]))
     return notes
 
+
+def map_notes_to_fretboard(notes):
+    frets = []
+    for note in notes: 
+        for i in range(len(fretboard)): 
+            for j in range(len(fretboard[1])): 
+                if note == fretboard[i][j]: 
+                    frets.append((i, j))
+                    break
+            else: 
+                continue
+            break
+    return frets

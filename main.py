@@ -1,8 +1,9 @@
 from flask import Flask, request
 from flask_cors import CORS, cross_origin
 import os 
-from lib import load_signal_from_file_path, find_notes, load_siganl_from_file
+from lib import load_signal_from_file_path, find_notes, find_maximum_amplitude, map_notes_to_fretboard
 import subprocess
+
 
 
 
@@ -42,11 +43,14 @@ def process_audio():
         # new_file.audio.write_audiofile(os.path.join(app.config['UPLOAD_FOLDER'], file_name + ".wav"))
 
         y, fs = load_signal_from_file_path(os.path.join(app.config['UPLOAD_FOLDER'],  file.filename))
-        notes = find_notes(y, fs)
+        maxim = find_maximum_amplitude(y)
+        notes = find_notes(y, fs, maxim)
         print(notes)
+        frets = map_notes_to_fretboard(notes)
+        print(frets)
 
         return {
-            "notes": notes
+            "notes": frets
         }, 200
 
 @app.route('/upload-audio', methods=['POST'])
@@ -68,8 +72,9 @@ def upload_audio():
 
         y, fs = load_signal_from_file_path(os.path.join(app.config['UPLOAD_FOLDER'], "audio_modified.wav"))
         notes = find_notes(y, fs)
+
         print(notes)
-        return "success", 200
+        return {"notes": notes}, 200
 
 
 # @app.route('/blob', methods=['POST'])
