@@ -3,7 +3,7 @@ from flask_cors import CORS, cross_origin
 import os 
 from lib import load_signal_from_file_path, find_notes, find_maximum_amplitude, map_notes_to_fretboard
 import subprocess
-
+from pathlib import Path
 
 
 
@@ -13,8 +13,11 @@ CORS(app, supports_credentials=True)
 
 # UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'uploads\\')
 UPLOAD_FOLDER = "uploads/"
+SAVED_FOLDER = "uploads/saved"
 ALLOWED_EXTENSIONS = {"wav"}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['SAVED_FOLDER'] = SAVED_FOLDER
+
 
 path = os.path.join(app.config['UPLOAD_FOLDER'], "audio.wav")
 
@@ -45,7 +48,7 @@ def process_audio():
         y, fs = load_signal_from_file_path(os.path.join(app.config['UPLOAD_FOLDER'],  file.filename))
         maxim = find_maximum_amplitude(y)
         notes = find_notes(y, fs, maxim)
-        os.remove (os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
+        # os.remove (os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
         print(notes)
         frets = map_notes_to_fretboard(notes)
         print(frets)
@@ -78,26 +81,15 @@ def upload_audio():
         print(notes)
         return {"notes": notes}, 200
 
+@app.route('/save', methods=['POST'])
+@cross_origin()
+def save(): 
+    fileName = request.get_json()['fileName']
+    folderName = fileName[:fileName.index(".")]
+    os.makedirs(os.path.join(app.config['SAVED_FOLDER'], folderName), exist_ok=True)
+    Path(os.path.join(app.config['UPLOAD_FOLDER'], fileName)).rename(os.path.join(app.config['SAVED_FOLDER'], folderName, fileName))
+    return {"res":"saved"}, 200
 
-# @app.route('/blob', methods=['POST'])
-# @cross_origin()
-# def process_audio_blob():
-#     if 'file' not in request.files:
-#         return {"error": "No file1"}, 400
-#     file = request.files['file']
-#     extname = guess_extension(file.mimetype)
-#     print(extname)
-#     if file.filename == '':
-#         return {"error": "No file"}, 400
-#     if file:
-#         file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename + extname ))
-#         y, fs = load_signal_from_file_path(os.path.join(app.config['UPLOAD_FOLDER'], file.filename+extname))
-#         notes = find_notes(y, fs)
-#         print(notes)
-
-#         return {
-#             "notes": notes
-#         }, 200
 
 if __name__ == '__main__':
     app.run(debug=True)
