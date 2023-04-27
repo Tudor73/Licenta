@@ -55,7 +55,7 @@ def plot_fft(y, fs):
 
 
 def find_fundamental_frequency(fft, fft_frequencies, maxim):
-    threshold = 0.025
+    threshold = 0.035
     notes = []
     for j in range(len(fft)):
         amplitude = np.abs(fft[j]) / maxim
@@ -98,12 +98,12 @@ def find_notes(y, fs, maxim):
 def map_notes_to_fretboard(notes):
     frets = []
     for note in notes: 
-        for i in range(len(fretboard)): 
-            for j in range(len(fretboard[1])): 
-                if note == fretboard[i][j]: 
-                    frets.append((i, j))
-                    break
-            else: 
-                continue
-            break
+        frets.append(search_note_in_fretboard(note))
     return frets
+
+def search_note_in_fretboard(note):
+    for i in range(len(fretboard)): 
+        for j in range(len(fretboard[1])): 
+            if note == fretboard[i][j]: 
+                return (i, j)
+    return None

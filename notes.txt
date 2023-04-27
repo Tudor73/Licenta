@@ -1,4 +1,10 @@
-threshholding 
+black: 
+    b3 d4 f#4 b3 f#4 g4 a4 g4 a4 b4 a4 g4 a4 
+dark: 
+    A3 D4 E4 F4 G4 F4 E4 C4    G3 C4 G3 A#3 C4 C4 F4 D4 
 
+one: 
+    D4 C#4 D4 E4 D4 E4 F#4 E4 F#4 G4 G4 F#4
 
-envelope 
+san:
+    E2 B2 F#3 G3 E2 C3 G3 G3 E2 D3 A3 G3  

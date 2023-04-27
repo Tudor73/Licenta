@@ -45,6 +45,7 @@ def process_audio():
         y, fs = load_signal_from_file_path(os.path.join(app.config['UPLOAD_FOLDER'],  file.filename))
         maxim = find_maximum_amplitude(y)
         notes = find_notes(y, fs, maxim)
+        os.remove (os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
         print(notes)
         frets = map_notes_to_fretboard(notes)
         print(frets)
@@ -71,7 +72,8 @@ def upload_audio():
 
 
         y, fs = load_signal_from_file_path(os.path.join(app.config['UPLOAD_FOLDER'], "audio_modified.wav"))
-        notes = find_notes(y, fs)
+        maxim = find_maximum_amplitude(y)
+        notes = find_notes(y, fs, maxim)
 
         print(notes)
         return {"notes": notes}, 200
