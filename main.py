@@ -18,10 +18,11 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 # UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'uploads\\')
 UPLOAD_FOLDER = "uploads/"
-SAVED_FOLDER = "uploads/saved"
-ALLOWED_EXTENSIONS = {"wav"}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['SAVED_FOLDER'] = SAVED_FOLDER
+
+SAVED_FOLDER = os.path.join(app.config['UPLOAD_FOLDER'], 'saved')
+ALLOWED_EXTENSIONS = {"wav"}
+app.config['SAVED_FOLDER'] = SAVED_FOLDER   
 
 app.config['SQLALCHEMY_DATABASE_URI'] ='sqlite:///' + os.path.join(basedir, 'database.db')
 
@@ -108,13 +109,23 @@ def upload_audio():
 @cross_origin()
 def save(): 
     fileName = request.get_json()['fileName']
-    folderName = fileName[:fileName.index(".")]
-    track = Track(username="test", track_name=folderName)
+    tab = request.get_json()['tab']
+    print(tab)
+    folder_name = fileName[:fileName.index(".")]
+    os.makedirs(os.path.join(app.config['SAVED_FOLDER'], folder_name), exist_ok=True)
+    Path(os.path.join(app.config['UPLOAD_FOLDER'], fileName)).rename(os.path.join(app.config['SAVED_FOLDER'], folder_name, fileName))
+
+    create_tab_file(folder_name, tab)
+    track = Track(username="test", track_name=folder_name)
     db.session.add(track)
     db.session.commit()
-    os.makedirs(os.path.join(app.config['SAVED_FOLDER'], folderName), exist_ok=True)
-    Path(os.path.join(app.config['UPLOAD_FOLDER'], fileName)).rename(os.path.join(app.config['SAVED_FOLDER'], folderName, fileName))
+
     return {"res":"saved"}, 200
+
+
+def create_tab_file(folder_name, notes):
+    with open(os.path.join(app.config['SAVED_FOLDER'], folder_name, folder_name+".txt"), "w") as f:
+        f.write("".join(notes))
 
 
 if __name__ == '__main__':
