@@ -4,12 +4,17 @@ import os
 from lib import load_signal_from_file_path, find_notes, find_maximum_amplitude, map_notes_to_fretboard
 import subprocess
 from pathlib import Path
+from flask_sqlalchemy import SQLAlchemy
 
 
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
 
+
+
+
+basedir = os.path.abspath(os.path.dirname(__file__))
 
 # UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'uploads\\')
 UPLOAD_FOLDER = "uploads/"
@@ -18,6 +23,24 @@ ALLOWED_EXTENSIONS = {"wav"}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['SAVED_FOLDER'] = SAVED_FOLDER
 
+app.config['SQLALCHEMY_DATABASE_URI'] ='sqlite:///' + os.path.join(basedir, 'database.db')
+
+db = SQLAlchemy(app)
+
+
+# db model
+class Track(db.Model): 
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), nullable=False)
+    track_name = db.Column(db.String(50), nullable=False)
+    # track_path = db.Column(db.String(50), nullable=False)
+    # track_notes_path = db.Column(db.String(50), nullable=False)
+
+    def __repr__(self):
+        return '<Track %r>' % self.track_name
+
+
+app.app_context().push()
 
 path = os.path.join(app.config['UPLOAD_FOLDER'], "audio.wav")
 
@@ -86,6 +109,9 @@ def upload_audio():
 def save(): 
     fileName = request.get_json()['fileName']
     folderName = fileName[:fileName.index(".")]
+    track = Track(username="test", track_name=folderName)
+    db.session.add(track)
+    db.session.commit()
     os.makedirs(os.path.join(app.config['SAVED_FOLDER'], folderName), exist_ok=True)
     Path(os.path.join(app.config['UPLOAD_FOLDER'], fileName)).rename(os.path.join(app.config['SAVED_FOLDER'], folderName, fileName))
     return {"res":"saved"}, 200
@@ -93,8 +119,6 @@ def save():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-
 
 
 
