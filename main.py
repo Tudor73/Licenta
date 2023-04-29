@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
 import os 
 from lib import load_signal_from_file_path, find_notes, find_maximum_amplitude, map_notes_to_fretboard
@@ -126,6 +126,32 @@ def save():
 def create_tab_file(folder_name, notes):
     with open(os.path.join(app.config['SAVED_FOLDER'], folder_name, folder_name+".txt"), "w") as f:
         f.write("".join(notes))
+
+def get_tab_from_file(folder_name):
+    with open(os.path.join(app.config['SAVED_FOLDER'], folder_name, folder_name+".txt"), "r") as f:
+        return f.read()
+
+@app.route('/tracks', methods=['GET'])
+@cross_origin()
+def get_tracks(): 
+    tracks = Track.query.with_entities(Track.id, Track.track_name, Track.username).all()
+    results = [{"id": t.id, "name": t.track_name, "username": t.username} for t in tracks]
+    print(tracks)
+    return jsonify({"tracks": results}), 200
+
+
+@app.route('/tracks/<id>', methods=['GET'])
+@cross_origin()
+def get_track_by_id(id): 
+    print(id)
+    track = Track.query.get(int(id))
+    tab = get_tab_from_file(track.track_name)
+    result = {"id": track.id, "name": track.track_name, "username": track.username, "tab": tab}
+    print(tab)
+    return jsonify({"track": result}), 200
+
+
+
 
 
 if __name__ == '__main__':
