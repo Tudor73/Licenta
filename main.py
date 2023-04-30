@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS, cross_origin
 import os 
 from lib import load_signal_from_file_path, find_notes, find_maximum_amplitude, map_notes_to_fretboard
@@ -130,6 +130,8 @@ def create_tab_file(folder_name, notes):
 def get_tab_from_file(folder_name):
     with open(os.path.join(app.config['SAVED_FOLDER'], folder_name, folder_name+".txt"), "r") as f:
         return f.read()
+    
+
 
 @app.route('/tracks', methods=['GET'])
 @cross_origin()
@@ -146,11 +148,17 @@ def get_track_by_id(id):
     print(id)
     track = Track.query.get(int(id))
     tab = get_tab_from_file(track.track_name)
+    
     result = {"id": track.id, "name": track.track_name, "username": track.username, "tab": tab}
     print(tab)
     return jsonify({"track": result}), 200
 
-
+@app.route('/tracks/<id>/wav', methods=['GET'])
+@cross_origin()
+def send_wav_file(id): 
+    track = Track.query.get(int(id))
+    path_to_file = os.path.join(app.config['SAVED_FOLDER'], track.track_name, track.track_name+".wav")
+    return send_file(path_to_file, mimetype="audio/wav", as_attachment=True)
 
 
 
