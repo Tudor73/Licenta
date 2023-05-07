@@ -3,3 +3,5 @@ venv
 uploads
 *.db
 *.db-journal
+inputs
+recordings

@@ -7,11 +7,8 @@ from pathlib import Path
 from flask_sqlalchemy import SQLAlchemy
 
 
-
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
-
-
 
 
 basedir = os.path.abspath(os.path.dirname(__file__))

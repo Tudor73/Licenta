@@ -22,11 +22,11 @@ def load_signal_from_file_path(filepath: str):
 def load_siganl_from_file(file):
     y, fs = librosa.load(file, sr=None) 
     # y = librosa.to_mono(y)
-    order = 3
-    low = 120.0
+    order = 4
+    low = 100.0
     high= 900.0
     b,a = butter(order, [low, high], fs=fs, btype='band')
-    y[np.abs(y) < 0.03] = 0
+    y[np.abs(y) < 0.04] = 0
     filtered_sound = lfilter(b, a ,y)
     y = filtered_sound
 
@@ -55,12 +55,12 @@ def plot_fft(y, fs):
 
 
 def find_fundamental_frequency(fft, fft_frequencies, maxim):
-    threshold = 0.035
+    threshold = 0.025
     notes = []
     for j in range(len(fft)):
         amplitude = np.abs(fft[j]) / maxim
         freq = round(fft_frequencies[j], 2)
-        if freq > 1000 or freq < 80:
+        if amplitude > 0.15 or amplitude < threshold:
             continue
         if amplitude > threshold: 
             notes.append([freq, round(amplitude,2)])
@@ -103,7 +103,7 @@ def map_notes_to_fretboard(notes):
 
 def search_note_in_fretboard(note):
     for i in range(len(fretboard)): 
-        for j in range(len(fretboard[1])): 
+        for j in range(len(fretboard[i])): 
             if note == fretboard[i][j]: 
                 return (i, j)
     return None
