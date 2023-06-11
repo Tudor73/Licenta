@@ -8,11 +8,11 @@ from fretboard import fretboard
 def load_signal_from_file_path(filepath: str): 
     y, fs = librosa.load(filepath, sr=None) 
     y = librosa.to_mono(y)
-    order = 3
-    low = 120.0
+    order = 4
+    low = 90.0
     high= 900.0
     b,a = butter(order, [low, high], fs=fs, btype='band')
-    y[np.abs(y) < 0.03] = 0
+    # y[np.abs(y) < 0.03] = 0
     filtered_sound = lfilter(b, a ,y)
     y = filtered_sound
 
@@ -23,10 +23,10 @@ def load_siganl_from_file(file):
     y, fs = librosa.load(file, sr=None) 
     # y = librosa.to_mono(y)
     order = 4
-    low = 100.0
+    low = 90.0
     high= 900.0
     b,a = butter(order, [low, high], fs=fs, btype='band')
-    y[np.abs(y) < 0.04] = 0
+    # y[np.abs(y) < 0.04] = 0
     filtered_sound = lfilter(b, a ,y)
     y = filtered_sound
 
@@ -35,7 +35,7 @@ def load_siganl_from_file(file):
 def find_maximum_amplitude(y):
     # fft_frequencies = np.fft.rfftfreq(len(y), 1/fs)
     sound_fft = np.fft.rfft(y) 
-    return max(np.abs(sound_fft))
+    return np.max(np.abs(sound_fft))
 
 
 def plot_signal(y, fs):
@@ -55,12 +55,12 @@ def plot_fft(y, fs):
 
 
 def find_fundamental_frequency(fft, fft_frequencies, maxim):
-    threshold = 0.025
+    threshold = 0.035
     notes = []
     for j in range(len(fft)):
         amplitude = np.abs(fft[j]) / maxim
         freq = round(fft_frequencies[j], 2)
-        if amplitude > 0.15 or amplitude < threshold:
+        if amplitude < threshold:
             continue
         if amplitude > threshold: 
             notes.append([freq, round(amplitude,2)])

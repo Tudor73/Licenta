@@ -25,12 +25,12 @@ app.config['SQLALCHEMY_DATABASE_URI'] ='sqlite:///' + os.path.join(basedir, 'dat
 
 db = SQLAlchemy(app)
 
-
 # db model
 class Track(db.Model): 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), nullable=False)
     track_name = db.Column(db.String(50), nullable=False)
+    song_name = db.Column(db.String(50), nullable=False)
     # track_path = db.Column(db.String(50), nullable=False)
     # track_notes_path = db.Column(db.String(50), nullable=False)
 
@@ -39,6 +39,9 @@ class Track(db.Model):
 
 
 app.app_context().push()
+
+# with app.app_context():
+#     db.create_all()
 
 path = os.path.join(app.config['UPLOAD_FOLDER'], "audio.wav")
 
@@ -107,13 +110,15 @@ def upload_audio():
 def save(): 
     fileName = request.get_json()['fileName']
     tab = request.get_json()['tab']
+    username = request.get_json()['username']
+    song_name = request.get_json()['songName']
     print(tab)
     folder_name = fileName[:fileName.index(".")]
     os.makedirs(os.path.join(app.config['SAVED_FOLDER'], folder_name), exist_ok=True)
     Path(os.path.join(app.config['UPLOAD_FOLDER'], fileName)).rename(os.path.join(app.config['SAVED_FOLDER'], folder_name, fileName))
 
     create_tab_file(folder_name, tab)
-    track = Track(username="test", track_name=folder_name)
+    track = Track(username=username, track_name=folder_name, song_name=song_name)
     db.session.add(track)
     db.session.commit()
 
